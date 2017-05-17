@@ -15,7 +15,18 @@ void CustomStats::PercentageCompleted()
 	BuildStatLine("PER_COM", &nRatio, 2, 0, 0); // Percentage completed
 }
 
+bool CustomStats::InsaneStuntCondition()
+{
+	return BestStuntJump == 1;
+}
+
+void CustomStats::InsaneStunt()
+{
+	AddTextLine("INSTUN"); // Insane stunt
+}
+
 void CustomStats::Register()
 {
 	Stats::Register(AlwaysTrue, PercentageCompleted);
+	Stats::Register(InsaneStuntCondition, InsaneStunt);
 }

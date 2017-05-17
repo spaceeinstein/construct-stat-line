@@ -7,6 +7,7 @@ public:
 	static float *FavoriteRadioStationList;
 	static int &TyresPopped;
 	static int *PedsKilledOfThisType;
+	static int &HighestLevelVigilanteMission;
 	static int &BoatsExploded;
 	static float &ShootingRank;
 	static float &TotalProgressInGame;
@@ -31,6 +32,7 @@ public:
 	static int &PeopleKilledByOthers;
 	static int &PropertyDestroyed;
 	static int &TotalNumberOfUniqueJumps;
+	static int &FlightTime;
 	static int &SeagullsKilled;
 	static float &LongestWheelieDist;
 	static float &PizzasDelivered;
@@ -41,11 +43,14 @@ public:
 	static int &SuburbanPassed;
 	static int &MaximumJumpSpins;
 	static int &HighestLevelAmbulanceMission;
+	static int &NumPropertyOwned;
 	static float &HighestChaseValue;
 	static int &DaysPassed;
 	static float &MaximumJumpDistance;
+	static int &PhotosTaken;
 	static float &StoresKnockedOff;
 	static int &CommercialPassed;
+	static float &PropertyBudget;
 	static int &TimesDrowned;
 	static float &Longest2WheelDist;
 	static int &LivesSavedWithAmbulance;
@@ -59,7 +64,9 @@ public:
 	static float &ProgressMade;
 	static int *HighestScores;
 	static int &HeadsPopped;
+	static int &BloodRingKills;
 	static float &MaximumJumpHeight;
+	static float &FashionBudget;
 	static int &PassengersDroppedOffWithTaxi;
 	static int &SafeHouseVisits;
 	static float &DistanceTravelledByBike;
@@ -74,11 +81,15 @@ public:
 	static int &NoMoreHurricanes;
 	static int &Longest2Wheel;
 	static float &DistanceTravelledByCar;
+	static int &BestPositions;
+	static float &WeaponBudget;
 	static int &MissionsGiven;
 	static float &AutoPaintingBudget;
 	static float &Assassinations;
+	static char *PropertyOwned;
 
 	static bool AlwaysTrue();
 	static bool AlwaysFalse();
-	static void Register(bool(*)(), void(*)());
+	static void Register(bool(*condition)(), void(*function)());
+	static void AddTextLine(const char *string);
 };
