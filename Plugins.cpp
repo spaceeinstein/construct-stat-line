@@ -1,6 +1,8 @@
 #include "Plugins.h"
 #include <Windows.h>
 
+int Plugins::total;
+
 Plugin::Plugin(char *path)
 {
 	this->module = LoadLibrary(path);
@@ -16,6 +18,7 @@ void Plugins::LoadPlugins()
 	WIN32_FIND_DATA FindFileData;
 	memset(&FindFileData, 0, sizeof(WIN32_FIND_DATA));
 	HANDLE hFind = FindFirstFile("stats\\*.stats", &FindFileData);
+	Plugins::total = 0;
 	if (hFind != INVALID_HANDLE_VALUE) {
 		do {
 			if (!(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
@@ -27,7 +30,7 @@ void Plugins::LoadPlugins()
 					if (!plugin->module) {
 						delete plugin; // failed to load
 					} else {
-						// loaded
+						Plugins::total++; // loaded
 					}
 				} else {
 					// failed to load

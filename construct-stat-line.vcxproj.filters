@@ -23,6 +23,9 @@
     <ClCompile Include="StatsSystem.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="DefaultStats.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stats.h">
@@ -32,6 +35,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="StatsSystem.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultStats.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

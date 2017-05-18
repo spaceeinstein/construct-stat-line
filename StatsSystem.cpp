@@ -1,4 +1,6 @@
 #include "StatsSystem.h"
+#include "DefaultStats.h"
+#include "Plugins.h"
 
 int StatsSystem::total;
 Stat *StatsSystem::line;
@@ -18,26 +20,22 @@ void StatsSystem::Init()
 	StatsSystem::total = 0;
 }
 
-unsigned int StatsSystem::ConstructStatLineHack(int line)
+int StatsSystem::ConstructStatLineHack(int line)
 {
-	int offset = 0;
-	StatsSystem::line = StatsSystem::begin;
-	while (StatsSystem::line) {
-		if (StatsSystem::line->condition()) {
-			if (line == offset++) {
-				StatsSystem::line->function();
-				return 0;
+	if (Plugins::total) {
+		int offset = 0;
+		Stat *current = StatsSystem::begin;
+		while (current) {
+			if (current->condition()) {
+				if (line == offset++) {
+					current->function();
+					return 0;
+				}
 			}
+			current = current->next;
 		}
-		StatsSystem::line = StatsSystem::line->next;
-	}
-	return offset;
-}
-
-void __declspec(naked) StatsSystem::ConstructStatLineHackProxy()
-{
-	__asm
-	{
-		jmp ConstructStatLineHack
+		return offset;
+	} else {
+		return DefaultStats::UseDefaultStatLine(line);
 	}
 }

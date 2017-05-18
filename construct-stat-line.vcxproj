@@ -87,12 +87,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DefaultStats.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Plugins.cpp" />
     <ClCompile Include="Stats.cpp" />
     <ClCompile Include="StatsSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DefaultStats.h" />
     <ClInclude Include="Plugins.h" />
     <ClInclude Include="Stats.h" />
     <ClInclude Include="StatsSystem.h" />

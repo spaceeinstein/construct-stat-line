@@ -13,5 +13,7 @@ public:
 class Plugins
 {
 public:
+	static int total;
+
 	static void LoadPlugins();
 };

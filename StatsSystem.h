@@ -10,7 +10,8 @@ public:
 	Stat(bool(*)(), void(*)());
 };
 
-class StatsSystem {
+class StatsSystem
+{
 public:
 	static Stat *line;
 	static Stat *begin;
@@ -18,6 +19,5 @@ public:
 	static int total;
 
 	static void Init();
-	static unsigned int ConstructStatLineHack(int line);
-	static void ConstructStatLineHackProxy();
+	static int ConstructStatLineHack(int line);
 };
