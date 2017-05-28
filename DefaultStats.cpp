@@ -3,15 +3,15 @@
 #define METRES_TO_MILES 0.0006213712f
 #define METRES_TO_FEET 3.28084f
 
-bool &nastyGame = *reinterpret_cast<bool *>(0x0068DD68);
-bool &isDaysPassedInitialised = *reinterpret_cast<bool *>(0x0070499C);
-int &storedDaysPassed = *reinterpret_cast<int *>(0x00704998);
-bool &isSpendingInitialised = *reinterpret_cast<bool *>(0x007049A4);
-float &storedSpending = *reinterpret_cast<float *>(0x007049A0);
-unsigned char &PrefsLanguage = *reinterpret_cast<unsigned char *>(0x00869680);
-int &totalPackages = *reinterpret_cast<int *>(0x0094ADD4);
-int &foundPackages = *reinterpret_cast<int *>(0x0094ADD0);
-unsigned int &nTimeInMilliseconds = *reinterpret_cast<unsigned int *>(0x00974B2C);
+static bool &nastyGame = *reinterpret_cast<bool *>(0x0068DD68);
+static bool &isDaysPassedInitialised = *reinterpret_cast<bool *>(0x0070499C);
+static int &storedDaysPassed = *reinterpret_cast<int *>(0x00704998);
+static bool &isSpendingInitialised = *reinterpret_cast<bool *>(0x007049A4);
+static int &storedSpending = *reinterpret_cast<int *>(0x007049A0);
+static unsigned char &PrefsLanguage = *reinterpret_cast<unsigned char *>(0x00869680);
+static int &totalPackages = *reinterpret_cast<int *>(0x0094ADD4);
+static int &foundPackages = *reinterpret_cast<int *>(0x0094ADD0);
+static unsigned int &nTimeInMilliseconds = *reinterpret_cast<unsigned int *>(0x00974B2C);
 
 enum eStatType
 {
@@ -116,19 +116,21 @@ int DefaultStats::UseDefaultStatLine(int line)
 		return 0;
 	}
 	if (line == offset++) {
+		float spending;
 		if (!isDaysPassedInitialised) {
 			storedDaysPassed |= 0xFFFFFFFF;
 			isDaysPassedInitialised = true;
 		}
 		if (!isSpendingInitialised) {
-			storedSpending = 0.0f;
+			storedSpending = 0;
 			isSpendingInitialised = true;
 		}
 		if (storedDaysPassed != DaysPassed) {
-			storedSpending = static_cast<float>(((nTimeInMilliseconds & 0xFF) + 0x50) * 255.44f);
+			storedSpending = static_cast<int>(((nTimeInMilliseconds & 0xFF) + 0x50) * 255.44f);
 			storedDaysPassed = DaysPassed;
 		}
-		BuildStatLine("DAYPLC", &storedSpending, STAT_TYPE_CASH, 0, 0); // Daily police spending
+		spending = static_cast<float>(storedSpending);
+		BuildStatLine("DAYPLC", &spending, STAT_TYPE_CASH, 0, 0); // Daily police spending
 		return 0;
 	}
 	int highestId = 0;
@@ -299,7 +301,7 @@ int DefaultStats::UseDefaultStatLine(int line)
 			BuildStatLine("DISTHEM", &distance, STAT_TYPE_FLOAT, 0, 0); // Distance traveled by helicopter (m)
 			return 0;
 		}
-		// fixes distance by plane omission
+		// fixes distances by bike and plane omission
 		if (line == offset++) {
 			float distance = static_cast<float>(static_cast<int>(
 				DistanceTravelledOnFoot +
@@ -369,6 +371,409 @@ int DefaultStats::UseDefaultStatLine(int line)
 			AddTextLine("NOSTUC"); // No INSANE stunts completed
 			return 0;
 		}
+	}
+	if (line == offset++) {
+		BuildStatLine("ST_WHEE", &LongestWheelie, STAT_TYPE_INT, 0, 0); // Longest Wheelie time (secs)
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("ST_WHED", &LongestWheelieDist, STAT_TYPE_FLOAT, 0, 0); // Longest Wheelie distance (m)
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("ST_STOP", &LongestStoppie, STAT_TYPE_INT, 0, 0); // Longest Stoppie time (secs)
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("ST_STOD", &LongestStoppieDist, STAT_TYPE_FLOAT, 0, 0); // Longest Stoppie distance (m)
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("ST_2WHE", &Longest2Wheel, STAT_TYPE_INT, 0, 0); // Longest 2 wheels time (secs)
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("ST_2WHD", &Longest2WheelDist, STAT_TYPE_FLOAT, 0, 0); // Longest 2 wheels distance (m)
+		return 0;
+	}
+	if (LoanSharks > 0.0 && line == offset++) {
+		int loan = static_cast<int>(LoanSharks);
+		BuildStatLine("ST_LOAN", &loan, STAT_TYPE_INT, 0, 0); // Visits From Loan Sharks
+	}
+	if (line == offset++) {
+		BuildStatLine("FEST_CC", &CriminalsCaught, STAT_TYPE_INT, 0, 0); // Criminals killed on Vigilante Mission
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("FEST_HV", &HighestLevelVigilanteMission, STAT_TYPE_INT, 0, 0); // Highest Vigilante Mission level
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("PASDRO", &PassengersDroppedOffWithTaxi, STAT_TYPE_INT, 0, 0); // Passengers dropped off
+		return 0;
+	}
+	if (line == offset++) {
+		float money = static_cast<float>(MoneyMadeWithTaxi);
+		BuildStatLine("MONTAX", &money, STAT_TYPE_CASH, 0, 0); // Cash made in taxi
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("FEST_LS", &LivesSavedWithAmbulance, STAT_TYPE_INT, 0, 0); // People saved in an Ambulance
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("FEST_HA", &HighestLevelAmbulanceMission, STAT_TYPE_INT, 0, 0); // Highest Paramedic Mission level
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("FEST_FE", &FiresExtinguished, STAT_TYPE_INT, 0, 0); // Total fires extinguished
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("FIRELVL", &HighestLevelFireMission, STAT_TYPE_INT, 0, 0); // Fire Truck Mission level
+		return 0;
+	}
+	if (line == offset++) {
+		int stores = static_cast<int>(StoresKnockedOff);
+		int total = 15;
+		BuildStatLine("ST_STOR", &stores, STAT_TYPE_INT, &total, 0); // Stores Knocked Off
+		return 0;
+	}
+	if (MovieStunts > 0.0 && line == offset++) {
+		int stunts = static_cast<int>(MovieStunts);
+		int total = 0;
+		BuildStatLine("ST_MOVI", &stunts, STAT_TYPE_INT, &total, 0); // Movie Stunts
+		return 0;
+	}
+	if (line == offset++) {
+		int assassinations = static_cast<int>(Assassinations);
+		int total = 5;
+		BuildStatLine("ST_ASSI", &assassinations, STAT_TYPE_INT, &total, 0); // Assassination Contracts Completed
+		return 0;
+	}
+	if (PhotosTaken > 0 && line == offset++) {
+		BuildStatLine("ST_PHOT", &PhotosTaken, STAT_TYPE_INT, 0, 0); // Photographs Taken
+		return 0;
+	}
+	if (PizzasDelivered > 0.0 && line == offset++) {
+		int pizzas = static_cast<int>(PizzasDelivered);
+		BuildStatLine("ST_PIZZ", &pizzas, STAT_TYPE_INT, 0, 0); // Pizza's Delivered
+		return 0;
+	}
+	if (GarbagePickups > 0.0 && line == offset++) {
+		int garbage = static_cast<int>(GarbagePickups);
+		BuildStatLine("ST_GARB", &garbage, STAT_TYPE_INT, 0, 0); // Garbage Pickups Made
+		return 0;
+	}
+	if (IceCreamSold > 0.0 && line == offset++) {
+		int icecream = static_cast<int>(IceCreamSold);
+		BuildStatLine("ST_ICEC", &icecream, STAT_TYPE_INT, 0, 0); // 'Ice Cream' Sold
+		return 0;
+	}
+	if (HighestScores[1] && line == offset++) {
+		BuildStatLine("STHC_02", &HighestScores[1], STAT_TYPE_INT, 0, 0); // Best Percentage of hits for Shooter
+		return 0;
+	}
+	if (FastestTimes[0] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[0];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_01", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on 'Alloy Wheels Of Steel'
+		return 0;
+	}
+	if (FastestTimes[1] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[1];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_02", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on 'The Driver'
+		return 0;
+	}
+	if (FastestTimes[2] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[2];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_03", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time in Dirt Ring
+		return 0;
+	}
+	if (FastestTimes[3] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[3];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_04", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on RC Plane Race
+		return 0;
+	}
+	if (FastestTimes[4] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[4];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_05", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on RC Car Race
+		return 0;
+	}
+	if (FastestTimes[5] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[5];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_06", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on RC helicopter Pickup
+		return 0;
+	}
+	if (FastestTimes[6] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[6];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_07", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on 'Terminal Velocity'
+		return 0;
+	}
+	if (FastestTimes[7] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[7];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_08", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on 'Ocean Drive'
+		return 0;
+	}
+	if (FastestTimes[8] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[8];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_09", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on 'Border Run'
+		return 0;
+	}
+	if (FastestTimes[9] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[9];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_10", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on 'Capital Cruise'
+		return 0;
+	}
+	if (FastestTimes[10] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[10];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_11", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on 'Tour!'
+		return 0;
+	}
+	if (FastestTimes[11] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[11];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_12", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on 'V.C. Endurance'
+		return 0;
+	}
+	if (FastestTimes[12] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[12];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_13", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on Downtown Chopper Checkpoint
+		return 0;
+	}
+	if (FastestTimes[13] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[13];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_14", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on Ocean Beach Chopper Checkpoint
+		return 0;
+	}
+	if (FastestTimes[14] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[14];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_15", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on Vice Point Chopper Checkpoint
+		return 0;
+	}
+	if (FastestTimes[15] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[15];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_16", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on Little Haiti Chopper Checkpoint
+		return 0;
+	}
+	if (FastestTimes[16] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[16];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_17", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on 'PCJ Playground'
+		return 0;
+	}
+	if (FastestTimes[17] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[17];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_18", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on 'Trial By Dirt'
+		return 0;
+	}
+	if (FastestTimes[18] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[18];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_19", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time on 'Test Track'
+		return 0;
+	}
+	if (FastestTimes[19] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[19];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_20", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time for 'Cone Crazy'
+		return 0;
+	}
+	if (FastestTimes[22] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[22];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_23", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time for Checkpoint Charlie
+		return 0;
+	}
+	if (HighestScores[0] && line == offset++) {
+		BuildStatLine("STHC_01", &HighestScores[0], STAT_TYPE_INT, 0, 0); // Highest score for Shooter
+		return 0;
+	}
+	if (HighestScores[3] && line == offset++) {
+		BuildStatLine("STHC_04", &HighestScores[3], STAT_TYPE_INT, 0, 0); // Highest score with Keepie-Uppy beach ball
+		return 0;
+	}
+	if (HighestScores[2] && line == offset++) {
+		BuildStatLine("STHC_03", &HighestScores[2], STAT_TYPE_INT, 0, 0); // Number of drug deals made
+		return 0;
+	}
+	if (BestPositions != 0x7FFFFFFF && line == offset++) {
+		BuildStatLine("STHC_05", &BestPositions, STAT_TYPE_INT, 0, 0); // Hotring Best Result
+		return 0;
+	}
+	if (FastestTimes[20] && line == offset++) {
+		int minutes = 0, seconds = FastestTimes[20];
+		while (seconds > 59) {
+			minutes++;
+			seconds -= 60;
+		}
+		if (seconds < 0) {
+			seconds *= -1;
+		}
+		BuildStatLine("STFT_21", &minutes, STAT_TYPE_INT, &seconds, 1); // Fastest time in Hotring
+		return 0;
+	}
+	if (FastestTimes[21] && line == offset++) {
+		float time = static_cast<float>(static_cast<int>(FastestTimes[21] / 1000.0f));
+		BuildStatLine("STFT_22", &time, STAT_TYPE_FLOAT, 0, 0); // Fastest lap time in Hotring
+		return 0;
+	}
+	if (TopShootingRangeScore > 0.0 && line == offset++) {
+		int score = static_cast<int>(TopShootingRangeScore);
+		BuildStatLine("TOP_SHO", &score, STAT_TYPE_INT, 0, 0); // Top Shooting Range Score
+		return 0;
+	}
+	if (ShootingRank > 0.0 && line == offset++) {
+		int rank = static_cast<int>(ShootingRank);
+		BuildStatLine("SHO_RAN", &rank, STAT_TYPE_INT, 0, 0); // Shooting Range Rank
+		return 0;
+	}
+	if (line == offset++) {
+		int hours = static_cast<int>(FlightTime / 3.6e6f);
+		int minutes = (FlightTime / 60000) % 60;
+		BuildStatLine("ST_FTIM", &hours, STAT_TYPE_INT, &minutes, 1); // Flight hours
+		return 0;
 	}
 	return offset;
 }
