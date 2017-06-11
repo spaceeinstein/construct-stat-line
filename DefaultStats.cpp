@@ -3,15 +3,19 @@
 #define METRES_TO_MILES 0.0006213712f
 #define METRES_TO_FEET 3.28084f
 
+static float *(__thiscall *GetListenTimeArray)(void *) = (float *(__thiscall *)(void *))0x005F96C0;
+static bool(__thiscall *IsMP3RadioChannelAvailable)(void *) = (bool(__thiscall *)(void *))0x005F9BB0;
 static bool &nastyGame = *reinterpret_cast<bool *>(0x0068DD68);
 static bool &isDaysPassedInitialised = *reinterpret_cast<bool *>(0x0070499C);
 static int &storedDaysPassed = *reinterpret_cast<int *>(0x00704998);
 static bool &isSpendingInitialised = *reinterpret_cast<bool *>(0x007049A4);
 static int &storedSpending = *reinterpret_cast<int *>(0x007049A0);
 static unsigned char &PrefsLanguage = *reinterpret_cast<unsigned char *>(0x00869680);
-static int &totalPackages = *reinterpret_cast<int *>(0x0094ADD4);
 static int &foundPackages = *reinterpret_cast<int *>(0x0094ADD0);
+static int &totalPackages = *reinterpret_cast<int *>(0x0094ADD4);
 static unsigned int &nTimeInMilliseconds = *reinterpret_cast<unsigned int *>(0x00974B2C);
+static unsigned char &PlayerInFocus = *reinterpret_cast<unsigned char *>(0x00A10AFB);
+static void *DMAudio = reinterpret_cast<void *>(0x00A10B8A);
 
 enum eStatType
 {
@@ -25,7 +29,7 @@ enum eStatType
 int DefaultStats::UseDefaultStatLine(int line)
 {
 	int offset = 0;
-	// fixes game's odd possibility of division by 0
+	// fixes odd possibility of division by 0
 	if (line == offset++) {
 		float fRatio = 0.0f;
 		float adjustedTotal = nastyGame ? TotalProgressInGame : TotalProgressInGame - 1.0f;
@@ -61,12 +65,11 @@ int DefaultStats::UseDefaultStatLine(int line)
 		BuildStatLine("FEST_RP", &NumberKillFrenziesPassed, STAT_TYPE_INT, &TotalNumberKillFrenzies, 0); // Rampages passed
 		return 0;
 	}
+	// fixes ratio using constant total of 100
 	if (line == offset++) {
-		int ratio = 0;
-		if (totalPackages) {
-			ratio = static_cast<int>(foundPackages * 100.0f / totalPackages);
-		}
-		BuildStatLine("PERPIC", &ratio, STAT_TYPE_INT, &totalPackages, 0); // Hidden Packages found
+		int found = *(int *)(PlayerInFocus * 0x170 + (unsigned int)&foundPackages);
+		int total = *(int *)(PlayerInFocus * 0x170 + (unsigned int)&totalPackages);
+		BuildStatLine("PERPIC", &found, STAT_TYPE_INT, &total, 0); // Hidden Packages found
 		return 0;
 	}
 	if (nastyGame) {
@@ -774,6 +777,301 @@ int DefaultStats::UseDefaultStatLine(int line)
 		int minutes = (FlightTime / 60000) % 60;
 		BuildStatLine("ST_FTIM", &hours, STAT_TYPE_INT, &minutes, 1); // Flight hours
 		return 0;
+	}
+	// fixes incorrect pilot ranking display
+	if (FlightTime >= 5 * 60 * 1000) {
+		if (line == offset++) {
+			BuildStatLine("ST_PRAN", 0, 0, 0, 0); // Pilot Ranking
+			return 0;
+		}
+		if (line == offset++) {
+			if (FlightTime < 10 * 60 * 1000) {
+				AddTextLine("ST_PR01");
+				return 0;
+			}
+			if (FlightTime < 20 * 60 * 1000) {
+				AddTextLine("ST_PR02");
+				return 0;
+			}
+			if (FlightTime < 30 * 60 * 1000) {
+				AddTextLine("ST_PR03");
+				return 0;
+			}
+			if (FlightTime < 60 * 60 * 1000) {
+				AddTextLine("ST_PR04");
+				return 0;
+			}
+			if (FlightTime < 90 * 60 * 1000) {
+				AddTextLine("ST_PR05");
+				return 0;
+			}
+			if (FlightTime < 120 * 60 * 1000) {
+				AddTextLine("ST_PR06");
+				return 0;
+			}
+			if (FlightTime < 150 * 60 * 1000) {
+				AddTextLine("ST_PR07");
+				return 0;
+			}
+			if (FlightTime < 180 * 60 * 1000) {
+				AddTextLine("ST_PR08");
+				return 0;
+			}
+			if (FlightTime < 210 * 60 * 1000) {
+				AddTextLine("ST_PR09");
+				return 0;
+			}
+			if (FlightTime < 240 * 60 * 1000) {
+				AddTextLine("ST_PR10");
+				return 0;
+			}
+			if (FlightTime < 300 * 60 * 1000) {
+				AddTextLine("ST_PR11");
+				return 0;
+			}
+			if (FlightTime < 600 * 60 * 1000) {
+				AddTextLine("ST_PR12");
+				return 0;
+			}
+			if (FlightTime < 1200 * 60 * 1000) {
+				AddTextLine("ST_PR13");
+				return 0;
+			}
+			if (FlightTime < 1500 * 60 * 1000) {
+				AddTextLine("ST_PR14");
+				return 0;
+			}
+			if (FlightTime < 1800 * 60 * 1000) {
+				AddTextLine("ST_PR15");
+				return 0;
+			}
+			if (FlightTime < 2942 * 60 * 1000) {
+				AddTextLine("ST_PR16");
+				return 0;
+			}
+			if (FlightTime < 3000 * 60 * 1000) {
+				AddTextLine("ST_PR17");
+				return 0;
+			}
+			if (FlightTime < 6000 * 60 * 1000) {
+				AddTextLine("ST_PR18");
+				return 0;
+			}
+			AddTextLine("ST_PR19");
+			return 0;
+		}
+	}
+	if (BloodRingKills > 0 && line == offset++) {
+		BuildStatLine("ST_BRK", &BloodRingKills, STAT_TYPE_INT, 0, 0); // Number of bloodring kills
+		return 0;
+	}
+	if (BloodRingTime > 0 && line == offset++) {
+		BuildStatLine("ST_LTBR", &BloodRingTime, STAT_TYPE_INT, 0, 0); // Longest time in bloodring (secs)
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("ST_DRWN", &TimesDrowned, STAT_TYPE_INT, 0, 0); // Fishes Fed
+		return 0;
+	}
+	if (SeagullsKilled > 0 && line == offset++) {
+		BuildStatLine("SEAGULL", &SeagullsKilled, STAT_TYPE_INT, 0, 0); // Seagulls Sniped
+		return 0;
+	}
+	float *listeningTime = GetListenTimeArray(DMAudio);
+	float mostTime = FavoriteRadioStationList[0], leastTime = FavoriteRadioStationList[0];
+	int mostIndex = 0, leastIndex = 0;
+	for (int i = 0; i < 10; i++) {
+		FavoriteRadioStationList[i] = listeningTime[i];
+		if (FavoriteRadioStationList[i] > mostTime) {
+			// fixes possibility of showing mp3 station as most favorite if mp3 station is not available
+			if (!(i == 9 && !IsMP3RadioChannelAvailable(DMAudio))) {
+				mostTime = FavoriteRadioStationList[i];
+				mostIndex = i;
+			}
+		}
+		if (FavoriteRadioStationList[i] < leastTime) {
+			// fixes possibility of showing wave 103 station as least favorite if mp3 station is not available
+			if (!(i == 9 && !IsMP3RadioChannelAvailable(DMAudio))) {
+				leastTime = FavoriteRadioStationList[i];
+				leastIndex = i;
+			}
+		}
+	}
+	// fixes possibility of most favorite station also be least favorite station
+	if (mostIndex != leastIndex) {
+		if (line == offset++) {
+			BuildStatLine("FST_MFR", 0, 0, 0, 0); // Most Favorite Radio Station
+			return 0;
+		}
+		if (line == offset++) {
+			switch (mostIndex) {
+			case 0:
+				AddTextLine("FEA_FM0");
+				return 0;
+			case 1:
+				AddTextLine("FEA_FM1");
+				return 0;
+			case 2:
+				AddTextLine("FEA_FM2");
+				return 0;
+			case 3:
+				AddTextLine("FEA_FM3");
+				return 0;
+			case 4:
+				AddTextLine("FEA_FM4");
+				return 0;
+			case 5:
+				AddTextLine("FEA_FM5");
+				return 0;
+			case 6:
+				AddTextLine("FEA_FM6");
+				return 0;
+			case 7:
+				AddTextLine("FEA_FM7");
+				return 0;
+			case 8:
+				AddTextLine("FEA_FM8");
+				return 0;
+			case 9:
+				AddTextLine("FEA_MP3");
+				return 0;
+			default:
+				AddTextLine("FEA_FM8");
+				return 0;
+			}
+		}
+		if (line == offset++) {
+			BuildStatLine("FST_LFR", 0, 0, 0, 0); // Least Favorite Radio Station
+			return 0;
+		}
+		if (line == offset++) {
+			switch (leastIndex) {
+			case 0:
+				AddTextLine("FEA_FM0");
+				return 0;
+			case 1:
+				AddTextLine("FEA_FM1");
+				return 0;
+			case 2:
+				AddTextLine("FEA_FM2");
+				return 0;
+			case 3:
+				AddTextLine("FEA_FM3");
+				return 0;
+			case 4:
+				AddTextLine("FEA_FM4");
+				return 0;
+			case 5:
+				AddTextLine("FEA_FM5");
+				return 0;
+			case 6:
+				AddTextLine("FEA_FM6");
+				return 0;
+			case 7:
+				AddTextLine("FEA_FM7");
+				return 0;
+			case 8:
+				AddTextLine("FEA_FM8");
+				return 0;
+			case 9:
+				AddTextLine("FEA_MP3");
+				return 0;
+			default:
+				AddTextLine("FEA_FM8");
+				return 0;
+			}
+		}
+	}
+	if (line == offset++) {
+		BuildStatLine("SPRAYIN", &Sprayings, STAT_TYPE_INT, 0, 0); // Sprayings
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("ST_WEAP", &WeaponBudget, STAT_TYPE_CASH, 0, 0); // Weapon Budget
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("ST_FASH", &FashionBudget, STAT_TYPE_CASH, 0, 0); // Fashion Budget
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("ST_PROP", &PropertyBudget, STAT_TYPE_CASH, 0, 0); // Property Budget
+		return 0;
+	}
+	if (line == offset++) {
+		BuildStatLine("ST_AUTO", &AutoPaintingBudget, STAT_TYPE_CASH, 0, 0); // Auto Repair and Painting Budget
+		return 0;
+	}
+	if (line == offset++) {
+		float money = static_cast<float>(PropertyDestroyed);
+		BuildStatLine("ST_DAMA", &money, STAT_TYPE_CASH, 0, 0); // Property Destroyed
+		return 0;
+	}
+	if (NumPropertyOwned > 0) {
+		if (line == offset++) {
+			BuildStatLine("PROPOWN", &NumPropertyOwned, STAT_TYPE_INT, 0, 0); // Property Owned
+			return 0;
+		}
+		if (PropertyOwned[0] && line == offset++) {
+			AddTextLine("STPR_1");
+			return 0;
+		}
+		if (PropertyOwned[1] && line == offset++) {
+			AddTextLine("STPR_2");
+			return 0;
+		}
+		if (PropertyOwned[2] && line == offset++) {
+			AddTextLine("STPR_3");
+			return 0;
+		}
+		if (PropertyOwned[3] && line == offset++) {
+			AddTextLine("STPR_4");
+			return 0;
+		}
+		if (PropertyOwned[4] && line == offset++) {
+			AddTextLine("STPR_5");
+			return 0;
+		}
+		if (PropertyOwned[5] && line == offset++) {
+			AddTextLine("STPR_6");
+			return 0;
+		}
+		if (PropertyOwned[6] && line == offset++) {
+			AddTextLine("STPR_7");
+			return 0;
+		}
+		if (PropertyOwned[7] && line == offset++) {
+			AddTextLine("STPR_8");
+			return 0;
+		}
+		if (PropertyOwned[8] && line == offset++) {
+			AddTextLine("STPR_9");
+			return 0;
+		}
+		if (PropertyOwned[9] && line == offset++) {
+			AddTextLine("STPR_10");
+			return 0;
+		}
+		if (PropertyOwned[10] && line == offset++) {
+			AddTextLine("STPR_11");
+			return 0;
+		}
+		if (PropertyOwned[11] && line == offset++) {
+			AddTextLine("STPR_12");
+			return 0;
+		}
+		if (PropertyOwned[12] && line == offset++) {
+			AddTextLine("STPR_13");
+			return 0;
+		}
+		if (PropertyOwned[13] && line == offset++) {
+			AddTextLine("STPR_14");
+			return 0;
+		}
+		if (PropertyOwned[14] && line == offset++) {
+			AddTextLine("STPR_15");
+			return 0;
+		}
 	}
 	return offset;
 }
