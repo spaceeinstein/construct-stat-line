@@ -26,6 +26,11 @@ enum eStatType
 	STAT_TYPE_DEGREE
 };
 
+int DefaultStats::metricOnly;
+int DefaultStats::totalStoresKnockedOff;
+int DefaultStats::totalMovieStunts;
+int DefaultStats::totalAssassinations;
+
 int DefaultStats::UseDefaultStatLine(int line)
 {
 	int offset = 0;
@@ -217,7 +222,7 @@ int DefaultStats::UseDefaultStatLine(int line)
 		return 0;
 	}
 	// fixes inaccurate unit conversions
-	if (PrefsLanguage == 0) {
+	if (PrefsLanguage == 0 && !metricOnly) {
 		if (line == offset++) {
 			float distance = DistanceTravelledOnFoot * METRES_TO_MILES;
 			BuildStatLine("FEST_DF", &distance, STAT_TYPE_FLOAT, 0, 0); // Dist. traveled on foot (miles)
@@ -261,13 +266,13 @@ int DefaultStats::UseDefaultStatLine(int line)
 			BuildStatLine("TOT_DIS", &distance, STAT_TYPE_FLOAT, 0, 0); // Total distance traveled (miles)
 			return 0;
 		}
-		// fixes distance in feet omission
+		// fixes display in only meters
 		if (line == offset++) {
 			float distance = MaximumJumpDistance * METRES_TO_FEET;
 			BuildStatLine("MXCARD", &distance, STAT_TYPE_FLOAT, 0, 0); // Max. INSANE Jump dist. (ft)
 			return 0;
 		}
-		// fixes distance in feet omission
+		// fixes display in only meters
 		if (line == offset++) {
 			float distance = MaximumJumpHeight * METRES_TO_FEET;
 			BuildStatLine("MXCARJ", &distance, STAT_TYPE_FLOAT, 0, 0); // Max. INSANE Jump height (ft)
@@ -438,20 +443,17 @@ int DefaultStats::UseDefaultStatLine(int line)
 	}
 	if (line == offset++) {
 		int stores = static_cast<int>(StoresKnockedOff);
-		int total = 15;
-		BuildStatLine("ST_STOR", &stores, STAT_TYPE_INT, &total, 0); // Stores Knocked Off
+		BuildStatLine("ST_STOR", &stores, STAT_TYPE_INT, &totalStoresKnockedOff, 0); // Stores Knocked Off
 		return 0;
 	}
 	if (MovieStunts > 0.0 && line == offset++) {
 		int stunts = static_cast<int>(MovieStunts);
-		int total = 0;
-		BuildStatLine("ST_MOVI", &stunts, STAT_TYPE_INT, &total, 0); // Movie Stunts
+		BuildStatLine("ST_MOVI", &stunts, STAT_TYPE_INT, &totalMovieStunts, 0); // Movie Stunts
 		return 0;
 	}
 	if (line == offset++) {
 		int assassinations = static_cast<int>(Assassinations);
-		int total = 5;
-		BuildStatLine("ST_ASSI", &assassinations, STAT_TYPE_INT, &total, 0); // Assassination Contracts Completed
+		BuildStatLine("ST_ASSI", &assassinations, STAT_TYPE_INT, &totalAssassinations, 0); // Assassination Contracts Completed
 		return 0;
 	}
 	if (PhotosTaken > 0 && line == offset++) {

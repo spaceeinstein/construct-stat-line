@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Windows.h>
+
 class Stat
 {
 public:
@@ -16,7 +18,9 @@ public:
 	static Stat *line;
 	static Stat *begin;
 
-	static int total;
+	static HMODULE dllModule;
+	static int useDefaultStats;
+	static int useCustomStats;
 
 	static void Init();
 	static int ConstructStatLineHack(int line);

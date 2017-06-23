@@ -99,7 +99,7 @@ bool Stats::AlwaysFalse()
 
 void Stats::Register(bool(*condition)(), void(*function)())
 {
-	if (StatsSystem::total) {
+	if (StatsSystem::begin) {
 		StatsSystem::line = StatsSystem::line->next = new Stat(condition, function);
 	} else {
 		StatsSystem::begin = StatsSystem::line = new Stat(condition, function);
