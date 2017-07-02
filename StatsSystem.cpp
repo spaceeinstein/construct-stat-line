@@ -5,8 +5,10 @@
 
 Stat *StatsSystem::line;
 Stat *StatsSystem::begin;
+bool StatsSystem::isPressingKey;
 
 HMODULE StatsSystem::dllModule;
+int StatsSystem::reloadKey;
 int StatsSystem::useDefaultStats;
 int StatsSystem::useCustomStats;
 
@@ -27,6 +29,7 @@ void StatsSystem::Init()
 	moduleIniPath[nLen - 2] = L'n';
 	moduleIniPath[nLen - 3] = L'i';
 
+	StatsSystem::reloadKey = GetPrivateProfileInt("Main", "ReloadKey", 0x52, moduleIniPath); // R key
 	StatsSystem::useDefaultStats = GetPrivateProfileInt("Main", "UseDefaultStats", 1, moduleIniPath);
 	StatsSystem::useCustomStats = GetPrivateProfileInt("Main", "UseCustomStats", 1, moduleIniPath);
 
@@ -36,15 +39,38 @@ void StatsSystem::Init()
 	DefaultStats::totalAssassinations = GetPrivateProfileInt("DefaultStats", "TotalAssassinations", 5, moduleIniPath);
 
 	StatsSystem::line = StatsSystem::begin = nullptr;
+	StatsSystem::isPressingKey = false;
+
+	Plugins::LoadPlugins();
+}
+
+void StatsSystem::Reinit()
+{
+	Stat *current = StatsSystem::begin;
+	while (current) {
+		Stat *next = current->next;
+		delete current;
+		current = next;
+	}
+	Plugins::UnloadPlugins();
+	StatsSystem::Init();
 }
 
 int StatsSystem::ConstructStatLineHack(int line)
 {
 	int offset = 0;
+	if (GetKeyState(StatsSystem::reloadKey) & 0x8000) {
+		if (!StatsSystem::isPressingKey) {
+			StatsSystem::Reinit();
+			StatsSystem::isPressingKey = true;
+		}
+	} else {
+		StatsSystem::isPressingKey = false;
+	}
 	if (StatsSystem::useDefaultStats) {
 		offset = DefaultStats::UseDefaultStatLine(line);
 	}
-	if (Plugins::total && StatsSystem::useCustomStats && (StatsSystem::useDefaultStats && offset > 0 || !StatsSystem::useDefaultStats)) {
+	if (Plugins::plugins && StatsSystem::useCustomStats && (StatsSystem::useDefaultStats && offset > 0 || !StatsSystem::useDefaultStats)) {
 		Stat *current = StatsSystem::begin;
 		while (current) {
 			if (current->condition()) {

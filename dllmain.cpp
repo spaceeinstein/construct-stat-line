@@ -1,6 +1,5 @@
 #include <cstdint>
 #include <Windows.h>
-#include "Plugins.h"
 #include "StatsSystem.h"
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID)
@@ -15,7 +14,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID)
 			*reinterpret_cast<uint32_t *>(jumpAddress + 1) = reinterpret_cast<uint32_t>(&StatsSystem::ConstructStatLineHack) - jumpAddress - 5;
 			VirtualProtect(reinterpret_cast<void *>(jumpAddress), 5, flOldProtect, &flOldProtect);
 			StatsSystem::Init();
-			Plugins::LoadPlugins();
 		}
 	}
 	return TRUE;

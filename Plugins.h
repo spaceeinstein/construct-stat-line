@@ -6,6 +6,7 @@ class Plugin
 {
 public:
 	HMODULE module;
+	Plugin *prev;
 	Plugin(char *path);
 	~Plugin();
 };
@@ -13,7 +14,8 @@ public:
 class Plugins
 {
 public:
-	static int total;
+	static Plugin *plugins;
 
 	static void LoadPlugins();
+	static void UnloadPlugins();
 };
