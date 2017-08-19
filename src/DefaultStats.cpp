@@ -1075,5 +1075,93 @@ int DefaultStats::UseDefaultStatLine(int line)
 			return 0;
 		}
 	}
+	if (line == offset++) {
+		int value = static_cast<int>(HighestChaseValue);
+		BuildStatLine("CHASE", &value, STAT_TYPE_INT, 0, 0);
+	}
+	if (line == offset++) {
+		if (HighestChaseValue < 20.0) {
+			AddTextLine("CHASE1");
+			return 0;
+		}
+		if (HighestChaseValue < 50.0) {
+			AddTextLine("CHASE2");
+			return 0;
+		}
+		if (HighestChaseValue < 75.0) {
+			AddTextLine("CHASE3");
+			return 0;
+		}
+		if (HighestChaseValue < 100.0) {
+			AddTextLine("CHASE4");
+			return 0;
+		}
+		if (HighestChaseValue < 150.0) {
+			AddTextLine("CHASE5");
+			return 0;
+		}
+		if (HighestChaseValue < 200.0) {
+			AddTextLine("CHASE6");
+			return 0;
+		}
+		if (HighestChaseValue < 250.0) {
+			AddTextLine("CHASE7");
+			return 0;
+		}
+		if (HighestChaseValue < 300.0) {
+			AddTextLine("CHASE8");
+			return 0;
+		}
+		if (HighestChaseValue < 350.0) {
+			AddTextLine("CHASE9");
+			return 0;
+		}
+		if (HighestChaseValue < 400.0) {
+			AddTextLine("CHASE10");
+			return 0;
+		}
+		if (HighestChaseValue < 500.0) {
+			AddTextLine("CHASE11");
+			return 0;
+		}
+		if (HighestChaseValue < 600.0) {
+			AddTextLine("CHASE12");
+			return 0;
+		}
+		if (HighestChaseValue < 700.0) {
+			AddTextLine("CHASE13");
+			return 0;
+		}
+		if (HighestChaseValue < 800.0) {
+			AddTextLine("CHASE14");
+			return 0;
+		}
+		if (HighestChaseValue < 900.0) {
+			AddTextLine("CHASE15");
+			return 0;
+		}
+		if (HighestChaseValue < 1000.0) {
+			AddTextLine("CHASE16");
+			return 0;
+		}
+		if (HighestChaseValue < 1200.0) {
+			AddTextLine("CHASE17");
+			return 0;
+		}
+		if (HighestChaseValue < 1400.0) {
+			AddTextLine("CHASE18");
+			return 0;
+		}
+		if (HighestChaseValue < 1600.0) {
+			AddTextLine("CHASE19");
+			return 0;
+		}
+		if (HighestChaseValue < 1800.0) {
+			AddTextLine("CHASE20");
+			return 0;
+		}
+		AddTextLine("CHASE21");
+		return 0;
+	}
 	return offset;
 }
